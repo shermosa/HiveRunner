@@ -3,7 +3,7 @@
 
     <groupId>com.klarna</groupId>
     <artifactId>hiverunner</artifactId>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>HDP2.6.3_3.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>HiveRunner</name>
     <description>HiveRunner is a unit test framework based on JUnit4 and enables TDD development of HiveQL without the need of any installed dependencies.</description>
@@ -39,8 +39,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tez.version>0.7.0</tez.version>
-        <hive.version>1.2.1</hive.version>
+        <tez.version>0.7.0.2.6.3.0-235</tez.version>
+        <hive.version>1.2.1000.2.6.3.0-235</hive.version>
+        <hadoop.version>2.7.3.2.6.3.0-235</hadoop.version>
         <hive.execution.engine>mr</hive.execution.engine>
     </properties>
 
@@ -63,7 +64,6 @@
             <version>${hive.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
@@ -79,7 +79,7 @@
                     <artifactId>derby</artifactId>
                     <groupId>org.apache.derby</groupId>
                 </exclusion>
-                <exclusion>
+                <!--<exclusion>
                     <artifactId>datanucleus-api-jdo</artifactId>
                     <groupId>org.datanucleus</groupId>
                 </exclusion>
@@ -90,7 +90,7 @@
                 <exclusion>
                     <artifactId>datanucleus-rdbms</artifactId>
                     <groupId>org.datanucleus</groupId>
-                </exclusion>
+                </exclusion>-->
                 <exclusion>
                     <artifactId>bonecp</artifactId>
                     <groupId>com.jolbox</groupId>
@@ -108,11 +108,13 @@
 
 
         <!-- The latest versions of datanucleus seems to be faster than the one included in hive -->
+<!--
         <dependency>
             <artifactId>datanucleus-api-jdo</artifactId>
             <groupId>org.datanucleus</groupId>
             <version>3.2.8</version>
         </dependency>
+-->
 
 
         <dependency>
@@ -133,7 +135,7 @@
             <version>${tez.version}</version>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <artifactId>datanucleus-core</artifactId>
             <groupId>org.datanucleus</groupId>
             <version>3.2.12</version>
@@ -144,7 +146,7 @@
             <groupId>org.datanucleus</groupId>
             <version>3.2.11</version>
         </dependency>
-
+-->
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-contrib</artifactId>
@@ -191,7 +193,7 @@
                 <version>2.17</version>
                 <configuration>
                     <!-- Hiverunner need this for some queries-->
-                    <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+                    <argLine>-Xmx2024m -XX:MaxPermSize=512m</argLine>
                     <systemProperties>
                         <!--
                         Any hive conf property may be overridden here by suffixing it with 'hiveconf_'

@@ -17,9 +17,14 @@
 package com.klarna.hiverunner;
 
 import com.klarna.hiverunner.config.HiveRunnerConfig;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
 import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.FsShellPermissions;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.ObjectStore;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.runtime.library.api.TezRuntimeConfiguration;
 import org.hsqldb.jdbc.JDBCDriver;
@@ -29,6 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,7 +45,7 @@ import static org.apache.hadoop.hive.conf.HiveConf.ConfVars.*;
  * Responsible for common configuration for running the HiveServer within this JVM with zero external dependencies.
  * <p/>
  * This class contains a bunch of methods meant to be overridden in order to create slightly different contexts.
- *
+ * <p>
  * This context configures HiveServer for both mr and tez. There's nothing contradicting with those configurations so
  * they may coexist in order to allow test cases to alter execution engines within the same test by
  * E.g: 'set hive.execution.engine=tez;'.
@@ -58,6 +65,38 @@ public class StandaloneHiveServerContext implements HiveServerContext {
         this.basedir = basedir;
         this.hiveRunnerConfig = hiveRunnerConfig;
     }
+
+    static {
+
+        // Use a NOOP Meta store filter hook. For some reason it did not help to set it via the hiveconf.
+        try {
+            ClassPool cp = new ClassPool(true);
+            CtClass ctClass = cp.get("org.apache.hadoop.hive.metastore.HiveMetaStoreClient");
+            CtMethod ctMethod = ctClass.getDeclaredMethod("loadFilterHooks");
+            ctMethod.setBody("{ return new org.apache.hadoop.hive.metastore.DefaultMetaStoreFilterHookImpl(conf); }");
+            ctClass.toClass();
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+
+        // Prohibit hadoop fs -chgrp from spamming sysout
+        setFinalStaticField(FsShellPermissions.class, "allowedChars", "[-_./@a-zA-Z0-9\\\\]");
+
+    }
+
+    private static void setFinalStaticField(Class<?> clazz, String fieldName, Object value) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Field modifiers = Field.class.getDeclaredField("modifiers");
+            modifiers.setAccessible(true);
+            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, value);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to set " + fieldName + "@" + clazz.getName() + " to '" + value + "'");
+        }
+    }
+
 
     @Override
     public final void init() {
@@ -83,6 +122,12 @@ public class StandaloneHiveServerContext implements HiveServerContext {
     }
 
     protected void configureMiscHiveSettings(HiveConf hiveConf) {
+
+
+        hiveConf.setBoolean("mapreduce.client.genericoptionsparser.used", true);
+        hiveConf.setBoolVar(HIVE_AUTHORIZATION_ENABLED, false);
+        hiveConf.setVar(HIVE_AUTHORIZATION_MANAGER, "org.apache.hive.hcatalog.storagehandler.DummyHCatAuthProvider");
+
         hiveConf.setBoolVar(HIVESTATSAUTOGATHER, false);
 
         // Turn of dependency to calcite library
@@ -114,9 +159,9 @@ public class StandaloneHiveServerContext implements HiveServerContext {
 
         // Defaults to a 1000 millis sleep in. We can speed up the tests a bit by setting this to 1 millis instead.
         // org.apache.hadoop.hive.ql.exec.mr.HadoopJobExecHelper.
-        hiveConf.setLongVar(HiveConf.ConfVars.HIVECOUNTERSPULLINTERVAL, 1L);
+        conf.setLongVar(HiveConf.ConfVars.HIVECOUNTERSPULLINTERVAL, 1L);
 
-        hiveConf.setBoolVar(HiveConf.ConfVars.HIVE_RPC_QUERY_PLAN, true);
+        conf.setBoolVar(HiveConf.ConfVars.HIVE_RPC_QUERY_PLAN, true);
     }
 
     protected void configureTezExecutionEngine(HiveConf conf) {
@@ -158,35 +203,36 @@ public class StandaloneHiveServerContext implements HiveServerContext {
     }
 
     protected void configureSupportConcurrency(HiveConf conf) {
-        hiveConf.setBoolVar(HIVE_SUPPORT_CONCURRENCY, false);
+        conf.setBoolVar(HIVE_SUPPORT_CONCURRENCY, false);
     }
 
     protected void configureMetaStore(HiveConf conf) {
+//        configureHsqldbMetastore(conf);
+        configureDerbyMetastore(conf);
+    }
 
-        String jdbcDriver = JDBCDriver.class.getName();
+    private void configureDerbyMetastore(HiveConf conf) {
 
-        try {
-            Class.forName(jdbcDriver);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        ObjectStore.setSchemaVerified(true);
 
-        // Set the hsqldb driver
-        metaStorageUrl = "jdbc:hsqldb:mem:" + UUID.randomUUID().toString();
-        hiveConf.set("datanucleus.connectiondrivername", jdbcDriver);
-        hiveConf.set("javax.jdo.option.ConnectionDriverName", jdbcDriver);
+//        metaStorageUrl = "jdbc:derby:;databaseName=target/metastore_db_" + UUID.randomUUID().toString() + ";create=true";
+        metaStorageUrl = "jdbc:derby:memory:metastore_db" + UUID.randomUUID() + ";create=true";
 
         // No pooling needed. This will save us a lot of threads
-        hiveConf.set("datanucleus.connectionPoolingType", "None");
+        conf.set("datanucleus.connectionPoolingType", "None");
+        conf.setBoolean("datanucleus.schema.autoCreateTables", true);
+
 
         conf.setBoolVar(METASTORE_VALIDATE_CONSTRAINTS, true);
         conf.setBoolVar(METASTORE_VALIDATE_COLUMNS, true);
         conf.setBoolVar(METASTORE_VALIDATE_TABLES, true);
+
+        conf.setVar(METASTORECONNECTURLKEY, metaStorageUrl);
+
+
     }
 
     protected void configureFileSystem(TemporaryFolder basedir, HiveConf conf) {
-        conf.setVar(METASTORECONNECTURLKEY, metaStorageUrl + ";create=true");
-
         createAndSetFolderProperty(METASTOREWAREHOUSE, "warehouse", conf, basedir);
         createAndSetFolderProperty(SCRATCHDIR, "scratchdir", conf, basedir);
         createAndSetFolderProperty(LOCALSCRATCHDIR, "localscratchdir", conf, basedir);

@@ -2,6 +2,10 @@
 
 ![ScreenShot](/images/HiveRunnerSplash.png)
 
+This branch is specifically built for HDP2.6.3. Since some HSQLDB compatibility got lost in that release, this branch is switched back to 
+using Derby. With that said it looks like Derby has gotten faster, because I could not see any big performance loss when doing the switch.
+
+
 
 HiveRunner
 ==========

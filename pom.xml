@@ -17,6 +17,13 @@
         </license>
     </licenses>
 
+    <repositories>
+        <repository>
+            <id>hortonworks</id>
+            <url>http://repo.hortonworks.com/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+
     <developers>
         <developer>
             <name>Per Ullberg</name>

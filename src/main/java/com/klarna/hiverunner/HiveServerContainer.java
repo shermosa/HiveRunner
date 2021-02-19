@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013-2019 Klarna AB
+ * Copyright (C) 2013-2021 Klarna AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,7 @@ public class HiveServerContainer {
 
     public List<Object[]> executeStatement(String hiveql) {
         try {
+            System.out.println("hiveql: "+hiveql);
             OperationHandle handle = client.executeStatement(sessionHandle, hiveql, new HashMap<>());
             List<Object[]> resultSet = new ArrayList<>();
             if (handle.hasResultSet()) {
@@ -142,6 +143,7 @@ public class HiveServerContainer {
                         }
                     })));
 
+            System.out.println("resultSet: "+resultSet.toString());
             return resultSet;
         } catch (HiveSQLException e) {
             throw new IllegalArgumentException("Failed to executeQuery Hive query " + hiveql + ": " + e.getMessage(),

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013-2019 Klarna AB
+ * Copyright (C) 2013-2021 Klarna AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,7 @@ class HiveShellBase implements HiveShell {
     }
 
     private List<Object[]> executeStatementsWithCommandShellEmulation(List<String> hiveSqlStatements) {
+        System.out.println("1: executeStatementsWithCommandShellEmulation");
         List<Object[]> results = new ArrayList<>();
         for (String hiveSqlStatement : hiveSqlStatements) {
             results.addAll(hiveServerContainer.executeStatement(hiveSqlStatement));

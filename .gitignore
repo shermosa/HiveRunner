@@ -71,5 +71,6 @@ Thumbs.db
 .classpath
 .project
 .settings/
+.gradle/
 
 /pubring.kbx

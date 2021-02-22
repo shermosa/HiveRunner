@@ -87,7 +87,9 @@ public class HiveServerContainer {
             // Locate the ClIService in the HiveServer2
             for (Service service : hiveServer2.getServices()) {
                 if (service instanceof CLIService) {
+                    System.out.println("service:"+service);
                     client = (CLIService) service;
+                    System.out.println("client:"+client);
                 }
             }
 
@@ -97,6 +99,7 @@ public class HiveServerContainer {
 
             SessionState sessionState = client.getSessionManager().getSession(sessionHandle).getSessionState();
             currentSessionState = sessionState;
+            System.out.println("hiveVars:"+hiveVars);
             currentSessionState.setHiveVariables(hiveVars);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to create HiveServer :" + e.getMessage(), e);
@@ -202,6 +205,7 @@ public class HiveServerContainer {
     }
 
     private void pingHiveServer() {
+      System.out.println("pinging hive server");
         executeStatement("SHOW TABLES");
     }
 

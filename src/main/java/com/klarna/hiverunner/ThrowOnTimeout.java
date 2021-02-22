@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013-2019 Klarna AB
+ * Copyright (C) 2013-2021 Klarna AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class ThrowOnTimeout extends Statement {
                 try {
                     stopWatch.start();
                     originalStatement.evaluate();
-                    finished = true;
+                    //finished = true;
                 } catch (InterruptedException e) {
                     // Ignore the InterruptedException
                     LOGGER.debug(e.getMessage(), e);

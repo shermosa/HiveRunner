@@ -31,7 +31,7 @@ import com.klarna.hiverunner.builder.Script;
 /**
  * A rule that executes the scripts under test
  */
-public class HiveRunnerRule extends SystemOutRule implements TestRule {
+public class HiveRunnerRule implements TestRule {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveRunnerRule.class);
     private final StandaloneHiveRunner runner;

@@ -18,6 +18,8 @@ package com.klarna.hiverunner;
 import java.util.List;
 
 import java.nio.file.Path;
+
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -29,7 +31,7 @@ import com.klarna.hiverunner.builder.Script;
 /**
  * A rule that executes the scripts under test
  */
-public class HiveRunnerRule implements TestRule {
+public class HiveRunnerRule extends SystemOutRule implements TestRule {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveRunnerRule.class);
     private final StandaloneHiveRunner runner;
@@ -46,6 +48,7 @@ public class HiveRunnerRule implements TestRule {
     public List<? extends Script> getScriptsUnderTest() {
         return scriptsUnderTest;
     }
+
 
     public void setScriptsUnderTest(List<? extends Script> scriptsUnderTest) {
         LOGGER.debug("Setting up hive runner scripts under test");

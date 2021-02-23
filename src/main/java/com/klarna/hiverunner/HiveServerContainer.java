@@ -87,9 +87,9 @@ public class HiveServerContainer {
             // Locate the ClIService in the HiveServer2
             for (Service service : hiveServer2.getServices()) {
                 if (service instanceof CLIService) {
-                    System.out.println("service:"+service);
+                    //System.out.println("service:"+service);
                     client = (CLIService) service;
-                    System.out.println("client:"+client);
+                    //System.out.println("client:"+client);
                 }
             }
 
@@ -99,7 +99,7 @@ public class HiveServerContainer {
 
             SessionState sessionState = client.getSessionManager().getSession(sessionHandle).getSessionState();
             currentSessionState = sessionState;
-            System.out.println("hiveVars:"+hiveVars);
+            //System.out.println("hiveVars:"+hiveVars);
             currentSessionState.setHiveVariables(hiveVars);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to create HiveServer :" + e.getMessage(), e);
@@ -120,7 +120,7 @@ public class HiveServerContainer {
 
     public List<Object[]> executeStatement(String hiveql) {
         try {
-            System.out.println("hiveql: "+hiveql);
+            //System.out.println("hiveql: "+hiveql);
             OperationHandle handle = client.executeStatement(sessionHandle, hiveql, new HashMap<>());
             List<Object[]> resultSet = new ArrayList<>();
             if (handle.hasResultSet()) {
@@ -146,7 +146,7 @@ public class HiveServerContainer {
                         }
                     })));
 
-            System.out.println("resultSet: "+resultSet.toString());
+            //System.out.println("resultSet: "+resultSet.toString());
             return resultSet;
         } catch (HiveSQLException e) {
             throw new IllegalArgumentException("Failed to executeQuery Hive query " + hiveql + ": " + e.getMessage(),
@@ -197,6 +197,8 @@ public class HiveServerContainer {
         client = null;
         sessionHandle = null;
 
+
+        //it doesnt reach here
         LOGGER.info("Tore down HiveServer instance");
     }
 
@@ -205,7 +207,7 @@ public class HiveServerContainer {
     }
 
     private void pingHiveServer() {
-      System.out.println("pinging hive server");
+      //System.out.println("pinging hive server");
         executeStatement("SHOW TABLES");
     }
 

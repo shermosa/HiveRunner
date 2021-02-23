@@ -49,6 +49,8 @@
   </properties>
   
   <dependencies>
+
+
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-serde</artifactId>

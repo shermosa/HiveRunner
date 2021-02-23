@@ -26,6 +26,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.junit.Ignore;
+import org.junit.contrib.java.lang.system.Assertion;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.rules.TestRule;
@@ -55,9 +58,12 @@ import static org.reflections.ReflectionUtils.withType;
 /**
  * JUnit 4 runner that runs hive sql on a HiveServer residing in this JVM. No external dependencies needed.
  */
-public class StandaloneHiveRunner extends BlockJUnit4ClassRunner {
+public class StandaloneHiveRunner extends BlockJUnit4ClassRunner implements Assertion {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandaloneHiveRunner.class);
+
+    private SystemOutRule systemOutRule = new SystemOutRule();
+    private ExpectedSystemExit expectedSystemExit;
 
     private HiveShellContainer container;
 
@@ -85,6 +91,9 @@ public class StandaloneHiveRunner extends BlockJUnit4ClassRunner {
         }
 
         HiveRunnerRule hiveRunnerRule = new HiveRunnerRule(this, target, testBaseDir);
+        systemOutRule = systemOutRule.enableLog();
+        //systemOutRule.mute();
+
 
         /*
          * Note that rules will be executed in reverse order to how they're added.
@@ -93,6 +102,7 @@ public class StandaloneHiveRunner extends BlockJUnit4ClassRunner {
         List<TestRule> rules = new ArrayList<>();
         rules.addAll(super.getTestRules(target));
         rules.add(hiveRunnerRule);
+        rules.add(systemOutRule);
         rules.add(ThrowOnTimeout.create(config, getName()));
 
         /*
@@ -131,6 +141,7 @@ public class StandaloneHiveRunner extends BlockJUnit4ClassRunner {
 
         try {
             statement.evaluate();
+
         } catch (AssumptionViolatedException e) {
             notifier.addFailedAssumption(e);
         } catch (TimeoutException e) {
@@ -167,10 +178,17 @@ public class StandaloneHiveRunner extends BlockJUnit4ClassRunner {
         try {
             LOGGER.info("Setting up {} in {}", getName(), temporaryFolder.getRoot());
             container = createHiveServerContainer(scripts, target, temporaryFolder);
+            //System.out.println("before test");
             base.evaluate();
+            expectedSystemExit.expectSystemExit();
+            //System.out.println("after test");
+            checkAssertion();
+
+            //System.out.println("LOG:"+systemOutRule.getLog());
             return container;
         } finally {
             tearDown();
+            System.out.println("after teardown");
         }
     }
 
@@ -245,5 +263,10 @@ public class StandaloneHiveRunner extends BlockJUnit4ClassRunner {
         MDC.put("testClassShort", getTestClass().getJavaClass().getSimpleName());
         MDC.put("testClass", getTestClass().getJavaClass().getName());
         MDC.put("testMethod", method.getName());
+    }
+
+    @Override
+    public void checkAssertion() throws Exception {
+
     }
 }

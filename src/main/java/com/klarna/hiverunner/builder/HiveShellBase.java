@@ -152,7 +152,7 @@ class HiveShellBase implements HiveShell {
         assertStarted();
         assertFileExists(path);
         List<String> hiveSqlStatements = lexer.applyToPath(path);
-        System.out.println("hiveSQLstatement"+hiveSqlStatements.toString());
+        //System.out.println("hiveSQLstatement"+hiveSqlStatements.toString());
         executeStatementsWithCommandShellEmulation(hiveSqlStatements);
     }
 
@@ -163,19 +163,19 @@ class HiveShellBase implements HiveShell {
 
         lexer = new StatementLexer(cwd, Charset.defaultCharset(), commandShellEmulator);
 
-        System.out.println("hiveConf:"+hiveConf);
-        System.out.println("hiveVars:"+hiveVars);
+        //System.out.println("hiveConf:"+hiveConf);
+        //System.out.println("hiveVars:"+hiveVars);
         hiveServerContainer.init(hiveConf, hiveVars);
 
-        System.out.println("executeSetupScripts()");
+        //System.out.println("executeSetupScripts()");
         executeSetupScripts();
 
-        System.out.println("prepareResources()");
+        //System.out.println("prepareResources()");
         prepareResources();
 
-        System.out.println("executeScriptsUnderTest()");
+        //System.out.println("executeScriptsUnderTest()");
         executeScriptsUnderTest();
-        System.out.println("finsih");
+        //System.out.println("finsih");
     }
 
     @Override
@@ -332,7 +332,7 @@ class HiveShellBase implements HiveShell {
     }
 
     private void executeScriptsUnderTest() {
-        System.out.println("scriptsundertest:"+scriptsUnderTest);
+        //System.out.println("scriptsundertest:"+scriptsUnderTest);
         for (Script script : scriptsUnderTest) {
             try {
                 executeScriptWithCommandShellEmulation(script.getSql());

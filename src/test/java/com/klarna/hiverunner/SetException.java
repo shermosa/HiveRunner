@@ -15,6 +15,7 @@
  */
 package com.klarna.hiverunner;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.contrib.java.lang.system.SystemOutRule;
@@ -34,28 +35,19 @@ public class SetException {
 
   @HiveSQL(files = {})
   private HiveShell shell;
-  private ExpectedSystemExit expectedSystemExit;
 
-  //  @Test
-//  public void testWithSuppressedOutput() {
-//    //systemOutRule.mute();
-//    System.out.print("some text");
-//  }
-//
-//  @Test
-//  public void testWithNormalOutput() {
-//    System.out.print("some text");
-//  }
-//
+  @Rule
+  public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+
   @Test
   public void test_without_set() {
+    exit.expectSystemExit();
     this.shell.execute(Paths.get("src/test/resources/test_without_set.hql"));
-    expectedSystemExit.expectSystemExit();
   }
 
   @Test
   public void test_with_set() {
+    exit.expectSystemExit();
     this.shell.execute(Paths.get("src/test/resources/test_with_set.hql"));
-    expectedSystemExit.expectSystemExit();
   }
 }

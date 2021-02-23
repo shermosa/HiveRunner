@@ -180,7 +180,7 @@ public class StandaloneHiveRunner extends BlockJUnit4ClassRunner implements Asse
             container = createHiveServerContainer(scripts, target, temporaryFolder);
             //System.out.println("before test");
             base.evaluate();
-            //System.out.println("after test");
+            System.out.println("after test");
             checkAssertion();
 
             //System.out.println("LOG:"+systemOutRule.getLog());

@@ -1,9 +1,8 @@
+CREATE DATABASE testdb;
 
 
 SET hive.exec.dynamic.partition.mode='nonstrict';
 SET hive.exec.dynamic.partition=true;
-
-CREATE DATABASE testdb;
 
 CREATE EXTERNAL TABLE testdb.test
 (

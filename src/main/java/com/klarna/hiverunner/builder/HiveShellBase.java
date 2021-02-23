@@ -112,15 +112,12 @@ class HiveShellBase implements HiveShell {
     }
 
     private List<Object[]> executeStatementsWithCommandShellEmulation(List<String> hiveSqlStatements) {
-      List<Object[]> results = new ArrayList();
-      Iterator var4 = hiveSqlStatements.iterator();
+        List<Object[]> results = new ArrayList<>();
+        for (String hiveSqlStatement : hiveSqlStatements) {
+            results.addAll(hiveServerContainer.executeStatement(hiveSqlStatement));
 
-      while(var4.hasNext()) {
-        String hiveSqlStatement = (String)var4.next();
-        results.addAll(this.hiveServerContainer.executeStatement(hiveSqlStatement));
-      }
-
-      return results;
+        }
+        return results;
     }
 
     @Override

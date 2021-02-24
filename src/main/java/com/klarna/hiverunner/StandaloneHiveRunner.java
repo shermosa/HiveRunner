@@ -186,6 +186,7 @@ public class StandaloneHiveRunner extends BlockJUnit4ClassRunner implements Asse
             //System.out.println("LOG:"+systemOutRule.getLog());
             return container;
         } finally {
+            System.out.println("before teardown");
             tearDown();
             System.out.println("after teardown");
         }

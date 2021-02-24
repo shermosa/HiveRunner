@@ -179,8 +179,11 @@ public class HiveServerContainer {
         }
 
         try {
+            System.out.println("after USE default");
             client.closeSession(sessionHandle);
+            System.out.println("after close session");
         } catch (Throwable e) {
+            System.out.println("failed to close client session");
             LOGGER.warn(
                 "Failed to close client session: " + e.getMessage() + ". Turn on log level debug for stacktrace");
             LOGGER.debug(e.getMessage(), e);

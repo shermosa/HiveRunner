@@ -31,7 +31,7 @@ import com.klarna.hiverunner.annotations.HiveSQL;
 import java.nio.file.Paths;
 
 @RunWith(StandaloneHiveRunner.class)
-public class SetException {
+public class SetExceptionTest {
 
   @HiveSQL(files = {})
   private HiveShell shell;

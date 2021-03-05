@@ -4,11 +4,7 @@ CREATE EXTERNAL TABLE customSerdeTable (s1 string, s2 string, s3 string)
             "key"="value",
             "KEY"= "VALUE",
             "key1" = "\\"
-
         )
         STORED AS TEXTFILE
 LOCATION '${hiveconf:hadoop.tmp.dir}/customSerde';
-
-
-
 
